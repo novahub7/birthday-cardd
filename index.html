@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unwrap Your Birthday Surprise! ✨</title>
+    <style>
+        :root {
+            /* --- Aesthetic Light Blue Theme --- */
+            --bg-gradient: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+            --primary: #38bdf8;
+            --primary-dark: #0284c7;
+            --accent: #bae6fd;
+            --text: #0f172a;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text);
+            overflow: hidden;
+            user-select: none;
+        }
+
+        /* --- Stage Manager --- */
+        .stage {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 1;
+            z-index: 10;
+        }
+
+        .stage.hidden {
+            opacity: 0;
+            transform: scale(0.8) translateY(-100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* --- STAGE 1: THE GIFT BOX --- */
+        #stage-1 { 
+            background: linear-gradient(135deg, #7dd3fc 0%, #0ea5e9 100%); 
+            z-index: 30;
+        }
+        
+        .gift-box {
+            position: relative;
+            width: 150px; height: 150px;
+            background-color: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 15px 30px rgba(14, 165, 233, 0.3);
+            animation: wobble 1.5s infinite;
+            z-index: 40;
+        }
+
+        .gift-box::before { 
+            content: ''; position: absolute; top: 65px; left: 0;
+            width: 100%; height: 20px; background: var(--accent);
+        }
+        .gift-box::after { 
+            content: ''; position: absolute; top: 0; left: 65px;
+            width: 20px; height: 100%; background: var(--accent);
+        }
+
+        .click-hint {
+            color: white; font-weight: bold; margin-top: 30px;
+            font-size: 1.2rem; text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* --- STAGE 2: BALLOON POPPING GAME --- */
+        #stage-2 { 
+            background: #f0f9ff; 
+            z-index: 5;
+        }
+        
+        #balloon-container {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: auto;
+            z-index: 6;
+        }
+
+        .balloon {
+            position: absolute;
+            width: 80px; height: 95px;
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            cursor: pointer;
+            box-shadow: inset -8px -10px rgba(0,0,0,0.05);
+            animation: floatUp 4s linear infinite;
+            z-index: 12;
+        }
+        
+        .balloon:after {
+            content: "▲"; 
+            position: absolute; 
+            bottom: -8px; 
+            left: 35px;
+            font-size: 10px; 
+            color: inherit;
+        }
+
+        /* Balloon Pop Floating Text Messages */
+        .pop-msg {
+            position: absolute;
+            color: var(--primary-dark);
+            font-weight: bold;
+            font-size: 1.2rem;
+            animation: fadeUpOut 1.2s ease-out forwards;
+            z-index: 15;
+            pointer-events: none;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 5px 12px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            white-space: nowrap;
+        }
+
+        /* --- STAGE 3: THE SCRAPBOOK SHOW --- */
+        .wrapper {
+            width: 90%; max-width: 500px; text-align: center;
+            z-index: 20;
+        }
+
+        .slider-container {
+            position: relative; width: 100%; height: 380px;
+            margin-bottom: 20px;
+        }
+
+        .polaroid-card {
+            position: absolute; width: 100%; height: 100%;
+            background: white; padding: 15px 15px 40px 15px;
+            box-sizing: border-box; border-radius: 4px;
+            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.1);
+            transition: transform 0.5s, opacity 0.5s;
+            opacity: 0; transform: scale(0.8) rotate(10deg);
+            pointer-events: none;
+        }
+
+        .polaroid-card.active {
+            opacity: 1; transform: scale(1) rotate(0deg);
+            pointer-events: auto;
+        }
+
+        .photo-frame {
+            width: 100%; height: 280px;
+            background-color: #f0f9ff; background-size: cover;
+            background-position: center; border-radius: 2px;
+        }
+
+        .caption {
+            margin-top: 15px; font-family: 'Courier New', Courier, monospace;
+            font-weight: bold; font-size: 1.1rem;
+            color: #334155;
+        }
+
+        .nav-btn {
+            background: var(--primary); color: white; border: none;
+            padding: 10px 20px; font-size: 1rem; font-weight: bold;
+            border-radius: 20px; cursor: pointer; margin: 5px;
+            box-shadow: 0 4px 10px rgba(56, 189, 248, 0.2);
+            transition: background 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* --- STAGE 4: AUTOTYPING LETTER --- */
+        .letter-box {
+            background: white; padding: 30px; border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            text-align: left; line-height: 1.6; max-height: 40vh;
+            overflow-y: auto; font-size: 1.1rem; border-top: 6px solid var(--primary);
+        }
+
+        /* --- SPOTIFY CONTROLLER --- */
+        .spotify-container {
+            margin-top: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes wobble {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-4deg) scale(1.05); }
+            75% { transform: rotate(4deg) scale(1.05); }
+        }
+
+        @keyframes floatUp {
+            0% { top: 100vh; transform: translateX(0); }
+            50% { transform: translateX(20px); }
+            100% { top: -120px; transform: translateX(-20px); }
+        }
+
+        @keyframes fadeUpOut {
+            0% { opacity: 0; transform: translateY(0); }
+            20% { opacity: 1; transform: translateY(-20px); }
+            100% { opacity: 0; transform: translateY(-60px); }
+        }
+
+        .confetti {
+            position: absolute; width: 8px; height: 8px;
+            animation: fall 3s linear infinite; pointer-events: none;
+            z-index: 100;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="pop-audio" preload="auto" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav"></audio>
+
+    <div id="stage-1" class="stage">
+        <div class="gift-box" onclick="goToStage2()"></div>
+        <div class="click-hint">Tap the box to unlock your surprise 🎁</div>
+    </div>
+
+    <div id="stage-2" class="stage hidden">
+        <h2 style="text-align:center; padding:0 20px; margin-bottom:5px; z-index:10; color: #0369a1;">Pop 5 Balloons to Unlock the Scrapbook! 🎈</h2>
+        <div id="score" style="font-size: 2rem; font-weight:bold; color: var(--primary-dark); z-index:10; margin-bottom:20px;">0 / 5</div>
+        <div id="balloon-container"></div>
+    </div>
+
+    <div id="stage-3" class="stage hidden">
+        <div class="wrapper">
+            <h2 style="color: var(--primary-dark);">Our Shared Moments 📸</h2>
+            <div class="slider-container">
+                <div class="polaroid-card active">
+                    <div class="photo-frame" style="background-image: url('https://i.ibb.co/kgy8qv0L/IMG-20260606-WA0061.jpg');"></div>
+                    <div class="caption">Memory One ✨</div>
+                </div>
+                <div class="polaroid-card">
+                    <div class="photo-frame" style="background-image: url('https://i.ibb.co/LzZ8BcDG/IMG-20260606-WA0062.jpg');"></div>
+                    <div class="caption">Memory Two ❤️</div>
+                </div>
+                <div class="polaroid-card">
+                    <div class="photo-frame" style="background-image: url('https://i.ibb.co/35qL3p29/IMG-20260606-WA0059.jpg');"></div>
+                    <div class="caption">Memory Three 💫</div>
+                </div>
+                <div class="polaroid-card">
+                    <div class="photo-frame" style="background-image: url('https://i.ibb.co/twYJqZBM/IMG-20260606-WA0058.jpg');"></div>
+                    <div class="caption">Memory Four ♾️</div>
+                </div>
+            </div>
+            <button class="nav-btn" onclick="changeSlide(-1)">◀ Prev</button>
+            <button class="nav-btn" onclick="changeSlide(1)">Next ▶</button>
+            <br><br>
+            <button class="nav-btn" style="background: #0ea5e9;" onclick="goToStage4()">Read My Letter 💌</button>
+        </div>
+    </div>
+
+    <div id="stage-4" class="stage hidden">
+        <div class="wrapper">
+            <h2 style="color: var(--primary-dark); margin-bottom: 10px;">Happy Birthday! 🎉</h2>
+            
+            <div class="letter-box" id="typing-letter"></div>
+            
+            <div class="spotify-container">
+                <iframe style="border-radius:12px" src="https://open.spotify.com/embed/track/16XNk3bVCSHXN1rlwbXtHb?utm_source=generator" width="100%" height="80" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+            </div>
+
+            <br>
+            <button class="nav-btn" style="background: var(--accent); color: #0369a1;" onclick="restartSurprise()">Restart Experience 🔄</button>
+        </div>
+    </div>
+
+    <script>
+        let currentStage = 1;
+        let score = 0;
+        let activeSlide = 0;
+        const totalBalloonsNeeded = 5;
+        let gameInterval;
+
+        // Custom balloon pop messages
+        const popMessages = [
+            "You are awesome! ⭐",
+            "Best friend ever! 🤍",
+            "El sa7b sa7eb 🤝",
+            "My soulmate ❤️",
+            "Pure energy ✨",
+            "I love you! ♾️"
+        ];
+
+        // Your custom birthday letter
+        const customMessage = "No words can describe the love i have for you. You genuinely deserve the best in every perspective of life. You are a living example of el sa7b sa7eb. You changed me to the better in every single way even if its unconsciously, kfaya your energy that fells up the room. I would truly choose you as my bsf in every single life time. Rabena yakhleki lya ya hanoon bgd ana b3sh2kkkkkkk YOU ARE MY SOULMATE.❤️❤️❤️";
+
+        function nextStage(stageNum) {
+            document.getElementById(`stage-${currentStage}`).classList.add('hidden');
+            currentStage = stageNum;
+            document.getElementById(`stage-${currentStage}`).classList.remove('hidden');
+        }
+
+        // --- STAGE 1 FUNCTIONS ---
+        function goToStage2() {
+            const audio = document.getElementById('pop-audio');
+            audio.play().then(() => {
+                audio.pause();
+                audio.currentTime = 0;
+            }).catch(e => console.log("Audio ready"));
+
+            nextStage(2);
+            startBalloonGame();
+        }
+
+        // --- STAGE 2 FUNCTIONS ---
+        function startBalloonGame() {
+            const colors = ['#bae6fd', '#7dd3fc', '#38bdf8', '#0ea5e9', '#93c5fd'];
+            const container = document.getElementById('balloon-container');
+            container.innerHTML = ''; 
+
+            gameInterval = setInterval(() => {
+                if (currentStage !== 2) { clearInterval(gameInterval); return; }
+                
+                const balloon = document.createElement('div');
+                balloon.classList.add('balloon');
+                balloon.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                balloon.style.color = balloon.style.backgroundColor; 
+                balloon.style.left = (Math.random() * 70 + 10) + 'vw'; 
+                balloon.style.animationDuration = (Math.random() * 1.5 + 2.5) + 's';
+                
+                balloon.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    const pAudio = document.getElementById('pop-audio');
+                    pAudio.currentTime = 0;
+                    pAudio.play().catch(() => {}); 
+                    
+                    // Show short floating text message on pop position
+                    const msgElement = document.createElement('div');
+                    msgElement.classList.add('pop-msg');
+                    msgElement.innerText = popMessages[Math.floor(Math.random() * popMessages.length)];
+                    msgElement.style.left = e.clientX + 'px';
+                    msgElement.style.top = e.clientY + 'px';
+                    document.body.appendChild(msgElement);
+                    setTimeout(() => msgElement.remove(), 1200);
+
+                    balloon.remove();
+                    score++;
+                    document.getElementById('score').innerText = `${score} / ${totalBalloonsNeeded}`;
+                    
+                    if (score >= totalBalloonsNeeded) {
+                        clearInterval(gameInterval);
+                        setTimeout(() => { nextStage(3); }, 800);
+                    }
+                });
+
+                container.appendChild(balloon);
+                setTimeout(() => { if(balloon.parentNode) balloon.remove(); }, 4000);
+            }, 900);
+        }
+
+        // --- STAGE 3 FUNCTIONS ---
+        function changeSlide(direction) {
+            const slides = document.querySelectorAll('.polaroid-card');
+            slides[activeSlide].classList.remove('active');
+            
+            activeSlide += direction;
+            if (activeSlide >= slides.length) activeSlide = 0;
+            if (activeSlide < 0) activeSlide = slides.length - 1;
+            
+            slides[activeSlide].classList.add('active');
+        }
+
+        function goToStage4() {
+            nextStage(4);
+            startTypewriter();
+            triggerConfettiStorm();
+        }
+
+        // --- STAGE 4 FUNCTIONS ---
+        function startTypewriter() {
+            let i = 0;
+            const element = document.getElementById('typing-letter');
+            element.innerHTML = '';
+            
+            function type() {
+                if (currentStage !== 4) return;
+                if (i < customMessage.length) {
+                    if (customMessage.charAt(i) === '\n') {
+                        element.innerHTML += '<br>';
+                    } else {
+                        element.innerHTML += customMessage.charAt(i);
+                    }
+                    i++;
+                    setTimeout(type, 35);
+                }
+            }
+            type();
+        }
+
+        function triggerConfettiStorm() {
+            for (let i = 0; i < 40; i++) {
+                setTimeout(() => {
+                    if (currentStage !== 4) return;
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti');
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.top = '-10px';
+                    confetti.style.backgroundColor = ['#bae6fd', '#38bdf8', '#e0f2fe', '#ffffff'][Math.floor(Math.random() * 4)];
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    document.body.appendChild(confetti);
+                    setTimeout(() => confetti.remove(), 3000);
+                }, i * 100);
+            }
+        }
+
+        function restartSurprise() {
+            clearInterval(gameInterval);
+            score = 0;
+            activeSlide = 0;
+            document.getElementById('score').innerText = `0 / 5`;
+            document.getElementById('balloon-container').innerHTML = '';
+            const slides = document.querySelectorAll('.polaroid-card');
+            slides.forEach((s, idx) => {
+                s.classList.remove('active');
+                if(idx === 0) s.classList.add('active');
+            });
+            nextStage(1);
+        }
+    </script>
+</body>
+</html>
